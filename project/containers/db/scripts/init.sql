@@ -1,0 +1,9 @@
+SET @username = '$MYSQL_USERNAME';
+SET @password = '$MYSQL_PASSWORD';
+SET @db = '$MYSQL_DATABASE';
+
+CREATE DATABASE IF NOT EXISTS @db;
+USE @db;
+CREATE USER @username IDENTIFIED BY @password;
+GRANT ALL PRIVILEGES ON @db.* TO @username;
+FLUSH PRIVILEGES;

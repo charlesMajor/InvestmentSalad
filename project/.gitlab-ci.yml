@@ -1,0 +1,64 @@
+stages:
+  - Api_unit_tests
+  - Next_unit_tests
+  - Deployment_test_vm
+  - Next_build
+  - Deployment_staging_vm
+Api_unit_tests:
+  stage: Api_unit_tests
+  only:
+    - merge_requests
+  script:
+    - cd ./containers/backend_api/investmentSaladApi
+    - ./mvnw clean test
+  image: eclipse-temurin:21-jdk
+
+Next_unit_tests:
+  stage: Next_unit_tests
+  only:
+    - merge_requests
+  script:
+    - cd ./containers/node
+    - npm install
+    - npm run test
+  image: node:20
+
+Next_build:
+  stage: Next_build
+  only:
+    - merge_requests
+  script:
+    - cd ./containers/node
+    - npm install
+    - npm run build
+  image: node:20
+
+Deployment_test_vm:
+  stage: Deployment_test_vm
+  only:
+    - dev
+  script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY_VM_TEST")
+    - ssh-add <(echo "$SSH_PRIVATE_KEY_GIT_VM_TEST")
+    - mkdir -p ~/.ssh/
+    - echo -e "Host $VM_TEST_IP \n\tForwardAgent yes" > ~/.ssh/config
+    - more ~/.ssh/config
+
+    - ssh -o StrictHostKeyChecking=no $VM_TEST_USERNAME@$VM_TEST_IP "cd ~/projetsynthese/ && git fetch origin dev && git reset --hard origin/dev && exit"
+    - ssh -o StrictHostKeyChecking=no $VM_TEST_USERNAME@$VM_TEST_IP "cd ~/projetsynthese/ && ./scripts/deployDetached.sh"
+
+Deployment_staging_vm:
+  stage: Deployment_staging_vm
+  only:
+    - main
+  script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY_VM_STAGING")
+    - ssh-add <(echo "$SSH_PRIVATE_KEY_GIT_VM_STAGING")
+    - mkdir -p ~/.ssh/
+    - echo -e "Host $VM_STAGING_IP \n\tForwardAgent yes" > ~/.ssh/config
+    - more ~/.ssh/config
+
+    - ssh -o StrictHostKeyChecking=no $VM_STAGING_USERNAME@$VM_STAGING_IP "cd ~/projetsynthese/ && git fetch origin main && git reset --hard origin/main && exit"
+    - ssh -o StrictHostKeyChecking=no $VM_STAGING_USERNAME@$VM_STAGING_IP "cd ~/projetsynthese/ && ./scripts/deployDetached.sh"

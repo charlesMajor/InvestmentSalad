@@ -1,0 +1,5 @@
+Investment Salad is a team project that aims to help users keep track of multiple sources of money, assets, investments, and more. 
+We prioritized simplicity and accessibility with a dashboard capable of holding as many customizable widgets as the user wants, 
+and a portfolio page that organizes and tracks the user's portfolios, representing banking accounts or collections of assets. 
+We made sure to provide a customizable environment that would fit each user's needs, offering choices for light or dark mode, 
+currency type, and language selection, all that in a modern display. The application works with a complete backend and a full database.

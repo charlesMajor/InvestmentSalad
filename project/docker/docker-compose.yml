@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  node:
+    build:
+      context: ./containers/node/
+    image: node
+    container_name: node_cnt
+    ports:
+      - 3000:3000
+
+  backend_api:
+    build:
+      context: ./containers/backend_api/
+    image: backend_api
+    container_name: backend-api-cnt
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: ./containers/db/
+    restart: always
+    image: mysql_database
+    container_name: db_cnt
+    command: --default-authentication-plugin=mysql_native_password
+    env_file: ./docker/.env
+    volumes:
+      - ./containers/db/data_repo:/var/lib/mysql
+
+volumes:
+  data_repo:
